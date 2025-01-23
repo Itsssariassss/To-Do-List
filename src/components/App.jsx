@@ -1,165 +1,247 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function App() {
-  const [tasks] = useState([
-    
-    { id: 1, task: "Task-1", dueDate: "26-nov-21", status: "Completed", priority: "High" },
-    { id: 2, task: "Task-2", dueDate: "28-nov-21", status: "Pending", priority: "Low" },
-    { id: 3, task: "Task-3", dueDate: "30-nov-21", status: "Completed", priority: "High" },
-    { id: 4, task: "Task-4", dueDate: "04-nov-21", status: "Completed", priority: "High" },
-   
-  ]);
+  const [tasks, setTasks] = useState(() => {
+    const savedTasks = localStorage.getItem('tasks');
+    return savedTasks ? JSON.parse(savedTasks) : [];
+  });
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Completed': return 'bg-green-500';
-      case 'Pending': return 'bg-red-500';
-      case 'In Progress': return 'bg-yellow-500';
-      default: return 'bg-gray-500';
+  const [showNewTaskModal, setShowNewTaskModal] = useState(false);
+  const [editTaskId, setEditTaskId] = useState(null);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskDueDate, setNewTaskDueDate] = useState('');
+  const [newTaskStatus, setNewTaskStatus] = useState('Pendiente');
+  const [newTaskPriority, setNewTaskPriority] = useState('Alta');
+  const [newTaskComments, setNewTaskComments] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  const openNewTaskModal = (task = null) => {
+    if (task) {
+      setEditTaskId(task.id);
+      setNewTaskTitle(task.title);
+      setNewTaskDueDate(task.dueDate);
+      setNewTaskStatus(task.status);
+      setNewTaskPriority(task.priority);
+      setNewTaskComments(task.comments);
+    } else {
+      setEditTaskId(null);
+      setNewTaskTitle('');
+      setNewTaskDueDate('');
+      setNewTaskStatus('Pendiente');
+      setNewTaskPriority('Alta');
+      setNewTaskComments('');
+    }
+    setShowNewTaskModal(true);
+  };
+
+  const closeNewTaskModal = () => {
+    setShowNewTaskModal(false);
+    setEditTaskId(null);
+    setNewTaskTitle('');
+    setNewTaskDueDate('');
+    setNewTaskStatus('Pendiente');
+    setNewTaskPriority('Alta');
+    setNewTaskComments('');
+  };
+
+  const saveTask = () => {
+    if (!newTaskTitle.trim() || !newTaskDueDate) {
+      alert('El título y la fecha de vencimiento son obligatorios.');
+      return;
+    }
+
+    if (editTaskId !== null) {
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === editTaskId
+            ? {
+                ...task,
+                title: newTaskTitle.trim(),
+                dueDate: newTaskDueDate,
+                status: newTaskStatus,
+                priority: newTaskPriority,
+                comments: newTaskComments.trim(),
+              }
+            : task
+        )
+      );
+    } else {
+      const newTask = {
+        id: tasks.length + 1,
+        title: newTaskTitle.trim(),
+        dueDate: newTaskDueDate,
+        status: newTaskStatus,
+        priority: newTaskPriority,
+        comments: newTaskComments.trim(),
+      };
+      setTasks([...tasks, newTask]);
+    }
+
+    closeNewTaskModal();
+  };
+
+  const deleteTask = (taskId) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar esta tarea?')) {
+      const updatedTasks = tasks
+        .filter((task) => task.id !== taskId)
+        .map((task, index) => ({ ...task, id: index + 1 }));
+      setTasks(updatedTasks);
     }
   };
 
-  // Cálculos para las estadísticas
-  const totalTasks = tasks.length;
-  const dueToday = 2; // Este valor debería calcularse basado en la fecha actual
-  const overDue = 0;
-
-  const totalPending = tasks.filter(task => task.status === 'Pending').length;
-  const totalCompleted = tasks.filter(task => task.status === 'Completed').length;
-  const totalInProgress = tasks.filter(task => task.status === 'In Progress').length;
-
-  const totalHigh = tasks.filter(task => task.priority === 'High').length;
-  const totalMedium = tasks.filter(task => task.priority === 'Medium').length;
-  const totalLow = tasks.filter(task => task.priority === 'Low').length;
-
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-6 mb-8">
-          {/* Task Stats */}
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="bg-cyan-500 text-white p-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Task</h3>
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-            </div>
-            <div className="p-4">
-              <table className="w-full">
-                <tbody>
-                  <tr className="border-b">
-                    <td className="py-2">Total Task</td>
-                    <td className="py-2 text-right">{totalTasks}</td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="py-2">Due for Today</td>
-                    <td className="py-2 text-right">{dueToday}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2">Over Due</td>
-                    <td className="py-2 text-right">{overDue}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+    <div className="p-8 sm:p-4">
+      <h1 className="text-2xl sm:text-xl font-bold mb-4">Gestor de Tareas</h1>
+      <button
+        onClick={() => openNewTaskModal()}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+      >
+        Nueva Tarea
+      </button>
 
-          {/* Status Stats */}
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="bg-cyan-500 text-white p-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Status</h3>
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+      {showNewTaskModal && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+          <div className="bg-white p-8 rounded shadow-lg w-full max-w-lg sm:max-w-md">
+            <h2 className="text-xl font-bold mb-4">
+              {editTaskId !== null ? 'Editar Tarea' : 'Nueva Tarea'}
+            </h2>
+            <form>
+              <div className="mb-4">
+                <label htmlFor="title" className="block font-bold mb-2">
+                  Título
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  className="border border-gray-400 p-2 w-full"
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                />
               </div>
-            </div>
-            <div className="p-4">
-              <table className="w-full">
-                <tbody>
-                  <tr className="border-b">
-                    <td className="py-2">Total Pending</td>
-                    <td className="py-2 text-right">{totalPending}</td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="py-2">Total Completed</td>
-                    <td className="py-2 text-right">{totalCompleted}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2">Total in Progress</td>
-                    <td className="py-2 text-right">{totalInProgress}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
 
-          {/* Priority Stats */}
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="bg-cyan-500 text-white p-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Priority</h3>
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                </svg>
+              <div className="mb-4">
+                <label htmlFor="dueDate" className="block font-bold mb-2">
+                  Fecha de Vencimiento
+                </label>
+                <input
+                  type="date"
+                  id="dueDate"
+                  className="border border-gray-400 p-2 w-full"
+                  value={newTaskDueDate}
+                  onChange={(e) => setNewTaskDueDate(e.target.value)}
+                />
               </div>
-            </div>
-            <div className="p-4">
-              <table className="w-full">
-                <tbody>
-                  <tr className="border-b">
-                    <td className="py-2">Total High</td>
-                    <td className="py-2 text-right">{totalHigh}</td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="py-2">Total Medium</td>
-                    <td className="py-2 text-right">{totalMedium}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2">Total Low</td>
-                    <td className="py-2 text-right">{totalLow}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+
+              <div className="mb-4">
+                <label htmlFor="status" className="block font-bold mb-2">
+                  Estado
+                </label>
+                <select
+                  id="status"
+                  className="border border-gray-400 p-2 w-full"
+                  value={newTaskStatus}
+                  onChange={(e) => setNewTaskStatus(e.target.value)}
+                >
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="En Proceso">En Progreso</option>
+                  <option value="Completada">Completada</option>
+                </select>
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="priority" className="block font-bold mb-2">
+                  Prioridad
+                </label>
+                <select
+                  id="priority"
+                  className="border border-gray-400 p-2 w-full"
+                  value={newTaskPriority}
+                  onChange={(e) => setNewTaskPriority(e.target.value)}
+                >
+                  <option value="Alta">Alta</option>
+                  <option value="Media">Media</option>
+                  <option value="Baja">Baja</option>
+                </select>
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="comments" className="block font-bold mb-2">
+                  Comentarios
+                </label>
+                <textarea
+                  id="comments"
+                  className="border border-gray-400 p-2 w-full"
+                  rows="3"
+                  value={newTaskComments}
+                  onChange={(e) => setNewTaskComments(e.target.value)}
+                ></textarea>
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-end sm:space-x-2 space-y-2 sm:space-y-0">
+                <button
+                  type="button"
+                  className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded"
+                  onClick={closeNewTaskModal}
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="button"
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={saveTask}
+                >
+                  {editTaskId !== null ? 'Guardar Cambios' : 'Guardar'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
+      )}
 
-        {/* Tasks Table */}
-        <div className="bg-white rounded-lg shadow">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-navy-700 text-white">
-                <th className="py-3 px-4 text-left">#</th>
-                <th className="py-3 px-4 text-left">Task</th>
-                <th className="py-3 px-4 text-left">Due Date</th>
-                <th className="py-3 px-4 text-left">Status</th>
-                <th className="py-3 px-4 text-left">Priority</th>
-                <th className="py-3 px-4 text-left">Comments</th>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="p-2 text-left">ID</th>
+              <th className="p-2 text-left">Título</th>
+              <th className="p-2 text-left">Fecha</th>
+              <th className="p-2 text-left">Estado</th>
+              <th className="p-2 text-left">Prioridad</th>
+              <th className="p-2 text-left">Comentarios</th>
+              <th className="p-2 text-left">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tasks.map((task) => (
+              <tr key={task.id} className="border-b">
+                <td className="p-2">{task.id}</td>
+                <td className="p-2">{task.title}</td>
+                <td className="p-2">{task.dueDate}</td>
+                <td className="p-2">{task.status}</td>
+                <td className="p-2">{task.priority}</td>
+                <td className="p-2">{task.comments}</td>
+                <td className="p-2 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                  <button
+                    onClick={() => openNewTaskModal(task)}
+                    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => deleteTask(task.id)}
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Eliminar
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {tasks.map((task) => (
-                <tr key={tasks.id} className="border-b hover:bg-gray-50">
-                  <td className="py-3 px-4">{task.id}</td>
-                  <td className="py-3 px-4">{task.task}</td>
-                  <td className="py-3 px-4">{task.dueDate}</td>
-                  <td className="py-3 px-4">
-                    <span className="flex items-center">
-                      <span className={`w-2 h-2 rounded-full mr-2 ${getStatusColor(task.status)}`}></span>
-                      {task.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">{task.priority}</td>
-                  <td className="py-3 px-4"></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

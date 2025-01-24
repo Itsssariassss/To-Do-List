@@ -8,4 +8,4 @@ function Todo() {
   );
 }
 
-export default App;
+export default Todo;

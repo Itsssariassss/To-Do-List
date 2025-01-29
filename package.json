@@ -11,11 +11,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && mv build dist",
+    "build": "react-scripts build && mv build dist", 
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d dist"  
   },
   "eslintConfig": {
     "extends": [
@@ -40,6 +40,5 @@
     "gh-pages": "^6.3.0",
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17"
-  },
-  "homepage": "https://Itsssariassss.github.io/To-Do-List"
+  }
 }

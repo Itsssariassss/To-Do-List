@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import "tailwindcss/tailwind.css"
+import "tailwindcss/tailwind.css";
 import TaskTable from "./TaskTable";
 import TaskModal from "./TaskModal";
 
@@ -22,35 +22,41 @@ function App() {
         prev.map((t) => (t.id === task.id ? { ...t, ...task } : t))
       );
     } else {
-      setTasks((prev) => [
-        ...prev,
-        { ...task, id: prev.length + 1 },
-      ]);
+      setTasks((prev) => [...prev, { ...task, id: prev.length + 1 }]);
     }
     setShowNewTaskModal(false);
+  };
+
+  const handleEditTaskModal = (task) => {
+    setCurrentTask(task);
+    setShowNewTaskModal(true);
   };
 
   const handleDeleteTask = (taskId) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar esta tarea?')) {
       setTasks((prev) =>
-        prev.filter((task) => task.id !== taskId).map((task, idx) => ({
-          ...task,
-          id: idx + 1,
-        }))
+        prev
+          .filter((task) => task.id !== taskId)
+          .map((task, idx) => ({
+            ...task,
+            id: idx + 1,
+          }))
       );
     }
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Gestor de Tareas</h1>
+    <div className="min-h-screen bg-gray-100 p-8 flex flex-col items-center">
+      <h1 className="text-3xl font-extrabold text-gray-700 mb-6">Gestor de Tareas</h1>
       <button
         onClick={() => setShowNewTaskModal(true)}
-        className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+        className="mb-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md"
       >
-        Nueva Tarea
+        + Nueva Tarea
       </button>
-      <TaskTable tasks={tasks} onEdit={setCurrentTask} onDelete={handleDeleteTask} />
+      <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6">
+        <TaskTable tasks={tasks} onEdit={handleEditTaskModal} onDelete={handleDeleteTask} />
+      </div>
       {showNewTaskModal && (
         <TaskModal
           task={currentTask}

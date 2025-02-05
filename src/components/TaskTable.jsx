@@ -1,41 +1,43 @@
 import React from 'react';
 
-const TaskTable = ({ tasks, deleteTask, openTaskModal }) => {
+// Componente TaskTable que recibe las tareas, una función para eliminar y otra para editar
+const TaskTable = ({ tasks: tasks, onDelete: deleteTask, onEdit: openTaskModal }) => {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
+    <div className="overflow-x-auto px-4 py-2 sm:px-6 md:px-8">
+      {/* Tabla para mostrar las tareas */}
+      <table className="w-full table-auto border-separate border-spacing-0">
         <thead>
           <tr className="bg-gray-200">
-            <th className="p-2 text-left">ID</th>
-            <th className="p-2 text-left">Título</th>
-            <th className="p-2 text-left">Fecha</th>
-            <th className="p-2 text-left">Estado</th>
-            <th className="p-2 text-left">Prioridad</th>
-            <th className="p-2 text-left">Comentarios</th>
-            <th className="p-2 text-left">Acciones</th>
+            <th className="p-3 text-left text-sm font-semibold text-gray-700">ID</th>
+            <th className="p-3 text-left text-sm font-semibold text-gray-700">Título</th>
+            <th className="p-3 text-left text-sm font-semibold text-gray-700">Fecha</th>
+            <th className="p-3 text-left text-sm font-semibold text-gray-700">Estado</th>
+            <th className="p-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
           </tr>
         </thead>
         <tbody>
+          {/* Itera sobre la lista de tareas y muestra cada una en una fila */}
           {tasks.map((task) => (
-            <tr key={task.id} className="border-b">
-              <td className="p-2">{task.id}</td>
-              <td className="p-2">{task.title}</td>
-              <td className="p-2">{task.dueDate}</td>
-              <td className="p-2">{task.status}</td>
-              <td className="p-2">{task.priority}</td>
-              <td className="p-2">{task.comments}</td>
-              <td className="p-2">
+            <tr key={task.id} className="border-b hover:bg-gray-50">
+              <td className="p-3 text-sm text-gray-600">{task.id}</td>
+              <td className="p-3 text-sm text-gray-600">{task.title}</td>
+              <td className="p-3 text-sm text-gray-600">{task.dueDate}</td>
+              <td className="p-3 text-sm text-gray-600">{task.status}</td>
+              <td className="p-3 text-sm flex space-x-2">
+                {/* Botón para editar una tarea */}
                 <button
                   onClick={() => openTaskModal(task)}
-                  className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded mr-2"
+                  className="bg-blue-500 hover:bg-blue-600 text-white py-1.5 px-3 rounded-lg shadow-md transition-all duration-300 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
-                  Editar
+                  ✏️ Editar
                 </button>
+
+                {/* Botón para eliminar una tarea */}
                 <button
                   onClick={() => deleteTask(task.id)}
-                  className="bg-red-500 hover:bg-red-700 text-white py-1 px-4 rounded"
+                  className="bg-red-500 hover:bg-red-600 text-white py-1.5 px-3 rounded-lg shadow-md transition-all duration-300 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400"
                 >
-                  Eliminar
+                  🗑️ Eliminar
                 </button>
               </td>
             </tr>
